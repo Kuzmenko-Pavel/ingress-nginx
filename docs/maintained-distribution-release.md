@@ -17,14 +17,11 @@ code, nginx templates, Helm chart, Dockerfiles, GitHub Actions, and documentatio
 ## Release model
 
 A release is produced by pushing a Git tag, then GitHub Actions builds and publishes the
-artifacts. Supported tag shapes:
+artifacts. Tags use plain SemVer:
 
 ```bash
-git tag v1.15.1          # stock build, no own runtime changes
+git tag v1.15.1
 git push origin v1.15.1
-
-git tag v1.15.1-kp.1     # build carrying own changes
-git push origin v1.15.1-kp.1
 ```
 
 The workflow `.github/workflows/release-ghcr.yml` will:
@@ -45,10 +42,8 @@ record in the release provenance).
 
 ## Versioning policy
 
-- If no own runtime/chart/build changes are present, a stock tag such as `v1.15.1` is acceptable.
-- If the build carries own changes to runtime, chart, or build logic, use a distribution tag
-  with a suffix, e.g. `v1.15.1-kp.1`, `v1.15.1-kp.2`.
-- The Helm chart version uses a compatible SemVer, e.g. `4.15.1-kp.1`, set in
+- Releases use plain SemVer tags, e.g. `v1.15.1`, `v1.15.2`, `v1.16.0` — no vendor suffixes.
+- The Helm chart version uses plain SemVer, e.g. `4.15.1`, set in
   `charts/ingress-nginx/Chart.yaml` `.version`.
 - Image tags always match the release tag.
 - When the base upstream commit/tag is known, record it in the release notes (via the
