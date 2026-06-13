@@ -24,15 +24,23 @@ git tag v1.15.1
 git push origin v1.15.1
 ```
 
-The workflow `.github/workflows/release-ghcr.yml` will:
+The workflow `.github/workflows/release.yaml` will:
 
 1. Determine versions from the Git tag (release tag) and repository files (`certgen`, `chart`)
-2. Build multi-arch images (`linux/amd64`, `linux/arm64`) via Docker Buildx
-3. Push images to GHCR and capture digests
-4. Patch `charts/ingress-nginx/values.yaml` with GHCR registry, tags, and digests for packaging
+2. Build and push the controller and controller-chroot images using the project's native
+   build logic: `make release REGISTRY=ghcr.io/kuzmenko-pavel/ingress-nginx` (multi-arch
+   `linux/amd64,linux/arm,linux/arm64` via Docker Buildx)
+3. Build and push `kube-webhook-certgen` natively: `cd images && make push NAME=kube-webhook-certgen REGISTRY=...`
+4. Resolve image digests and patch `charts/ingress-nginx/values.yaml` with GHCR registry,
+   tags (and digests when available) for packaging
 5. Run `helm lint` and `helm template` validation
-6. Package and push the Helm chart as an OCI artifact
+6. Package and push the Helm chart as an OCI artifact (`oci://ghcr.io/kuzmenko-pavel/charts`)
 7. Create a GitHub Release with a provenance block, image digest table, and chart attachment
+
+Auxiliary images (`images/**`) and the `nginx` base image are built and published natively
+by `.github/workflows/images.yaml` on changes under `images/`, pushed to the same GHCR
+namespace via `make`. There is no custom build-push wrapper — all image builds go through
+the repository `Makefile` / `images/Makefile`.
 
 ### Manual trigger
 
