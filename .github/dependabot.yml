@@ -1,43 +1,38 @@
 version: 2
+
 updates:
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
       interval: "weekly"
-    labels:
-      - "area/dependency"
-      - "release-note-none"
-      - "ok-to-test"
+      day: "sunday"
+    open-pull-requests-limit: 3
     groups:
-      actions:
-        update-types:
-          - "minor"
-          - "patch"
-  - package-ecosystem: "docker"
-    directories:
-      - "**/rootfs"
-    schedule:
-      interval: "weekly"
-    labels:
-      - "area/dependency"
-      - "release-note-none"
-      - "ok-to-test"
-    groups:
-      docker:
-        update-types:
-          - "minor"
-          - "patch"
+      github-actions:
+        patterns:
+          - "*"
+
   - package-ecosystem: "gomod"
     directories:
       - "/"
       - "**/rootfs"
     schedule:
       interval: "weekly"
-    labels:
-      - "area/dependency"
-      - "release-note-none"
-      - "ok-to-test"
+      day: "sunday"
+    open-pull-requests-limit: 3
     groups:
-      go:
-        update-types:
-          - "patch"
+      go-dependencies:
+        patterns:
+          - "*"
+
+  - package-ecosystem: "docker"
+    directories:
+      - "**/rootfs"
+    schedule:
+      interval: "weekly"
+      day: "sunday"
+    open-pull-requests-limit: 3
+    groups:
+      docker-images:
+        patterns:
+          - "*"
