@@ -1,14 +1,18 @@
-name: GHCR Downstream Release
+name: GHCR Maintained Distribution Release
 
 on:
   push:
     tags:
       - 'v[0-9]+.[0-9]+.[0-9]+'
+      - 'v[0-9]+.[0-9]+.[0-9]+-*'
   workflow_dispatch:
     inputs:
       tag:
-        description: 'Controller version tag (e.g. v1.15.1)'
+        description: 'Release tag (e.g. v1.15.1 or v1.15.1-kp.1)'
         required: true
+      upstream_base:
+        description: 'Optional upstream base tag/commit for provenance (e.g. v1.15.0)'
+        required: false
 
 permissions:
   contents: write
@@ -53,8 +57,8 @@ jobs:
             CONTROLLER_TAG="${{ github.ref_name }}"
           fi
 
-          if ! echo "${CONTROLLER_TAG}" | grep -qE '^v[0-9]+\.[0-9]+\.[0-9]+$'; then
-            echo "ERROR: tag '${CONTROLLER_TAG}' does not match vX.Y.Z format"
+          if ! echo "${CONTROLLER_TAG}" | grep -qE '^v[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9][a-zA-Z0-9.-]*)?$'; then
+            echo "ERROR: tag '${CONTROLLER_TAG}' does not match vX.Y.Z or vX.Y.Z-suffix format"
             exit 1
           fi
 
@@ -64,19 +68,29 @@ jobs:
           BASE_IMAGE="$(cat NGINX_BASE)"
           GOLANG_VERSION="$(cat GOLANG_VERSION)"
 
+          UPSTREAM_BASE="${{ github.event.inputs.upstream_base }}"
+          if [ -z "${UPSTREAM_BASE}" ] && [ -f UPSTREAM_BASE ]; then
+            UPSTREAM_BASE="$(cat UPSTREAM_BASE)"
+          fi
+          if [ -z "${UPSTREAM_BASE}" ]; then
+            UPSTREAM_BASE="(not recorded)"
+          fi
+
           echo "controller_tag=${CONTROLLER_TAG}"   >> "$GITHUB_OUTPUT"
           echo "certgen_tag=${CERTGEN_TAG}"         >> "$GITHUB_OUTPUT"
           echo "chart_version=${CHART_VERSION}"     >> "$GITHUB_OUTPUT"
           echo "commit_sha=${COMMIT_SHA}"           >> "$GITHUB_OUTPUT"
           echo "base_image=${BASE_IMAGE}"           >> "$GITHUB_OUTPUT"
           echo "golang_version=${GOLANG_VERSION}"   >> "$GITHUB_OUTPUT"
+          echo "upstream_base=${UPSTREAM_BASE}"     >> "$GITHUB_OUTPUT"
 
           echo "--- Version summary ---"
-          echo "Controller : ${CONTROLLER_TAG}"
-          echo "certgen    : ${CERTGEN_TAG}"
-          echo "Chart      : ${CHART_VERSION}"
-          echo "Commit     : ${COMMIT_SHA}"
-          echo "BASE_IMAGE : ${BASE_IMAGE}"
+          echo "Controller    : ${CONTROLLER_TAG}"
+          echo "certgen       : ${CERTGEN_TAG}"
+          echo "Chart         : ${CHART_VERSION}"
+          echo "Commit        : ${COMMIT_SHA}"
+          echo "BASE_IMAGE    : ${BASE_IMAGE}"
+          echo "Upstream base : ${UPSTREAM_BASE}"
 
       - name: Build and push controller
         id: controller
@@ -195,10 +209,15 @@ jobs:
           tag_name: ${{ steps.versions.outputs.controller_tag }}
           name: "controller-${{ steps.versions.outputs.controller_tag }}"
           body: |
-            ## GHCR Downstream Release
+            ## Maintained ingress-nginx Distribution Release
 
-            Downstream fork of [kubernetes/ingress-nginx](https://github.com/kubernetes/ingress-nginx).
-            No functional changes to ingress-nginx runtime code.
+            Self-maintained distribution based on ingress-nginx codebase.
+
+            ### Provenance
+
+            - Repository: `${{ github.repository }}`
+            - Commit: `${{ steps.versions.outputs.commit_sha }}`
+            - Upstream base: `${{ steps.versions.outputs.upstream_base }}`
 
             ### Container images
 
