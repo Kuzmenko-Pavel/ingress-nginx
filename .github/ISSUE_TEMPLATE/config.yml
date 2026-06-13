@@ -1,4 +1,5 @@
+blank_issues_enabled: true
 contact_links:
-  - name: Support Request/Question 
-    url: https://kubernetes.slack.com/messages/ingress-nginx/
-    about: Support request or question relating to Ingress NGINX in Kubernetes Slack
+  - name: Security vulnerability
+    url: https://github.com/Kuzmenko-Pavel/ingress-nginx/security/advisories/new
+    about: Report security vulnerabilities privately via GitHub Security Advisories (do not open a public issue)

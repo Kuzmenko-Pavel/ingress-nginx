@@ -1,20 +1,21 @@
 ---
-name: CVE Finding Report
-about: CVE reporting for ingress-nginx
+name: CVE / scanner finding report
+about: Report a published CVE surfaced by a scanner against this distribution
 title: ''
 labels: kind/bug
-assignees:
-    - Gacko
-    - strongjz
+assignees: ''
 ---
 
-<!-- if you found something that impacts directly ingress-nginx and
-is not a public CVE yet, please reach out security@kubernetes.io" -->
+<!--
+If the issue is NOT a public CVE yet (i.e. an undisclosed vulnerability), do NOT file it here.
+Report it privately via GitHub Security Advisories instead:
+https://github.com/Kuzmenko-Pavel/ingress-nginx/security/advisories/new
+-->
 
 <!-- What scanner and version reported the CVE? -->
 
 <!-- What CVE was reported in the scanner findings? -->
 
-<!-- What versions of the controller did you test with?  -->
+<!-- Which image tag / chart version did you test with? -->
 
-<!-- Please provider other details that will help us determine the severity of the issue -->
+<!-- Any other details that help determine severity. -->
